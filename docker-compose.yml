@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # --- SERVICE APLIKASI ---
+
+  # 1. Auth Service (Connect ke user-db)
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - DB_HOST=user-db        # Nama service database user
+      - DB_USER=admin
+      - DB_PASS=admin123
+      - DB_NAME=user_db
+      - JWT_SECRET=rahasia_super_aman_jangan_disebar
+    depends_on:
+      - user-db
+
+  # 2. Book Service (Connect ke library-db)
+  book-service:
+    build: ./book-service
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DB_HOST=library-db     # Nama service database library
+      - DB_USER=admin
+      - DB_PASS=admin123
+      - DB_NAME=library_db
+      - JWT_SECRET=rahasia_super_aman_jangan_disebar
+    depends_on:
+      - library-db
+
+  # 3. Frontend
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - auth-service
+      - book-service
+
+  # --- SERVICE DATABASE ---
+
+  # 4. Database Khusus User/Auth
+  user-db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin123
+      - POSTGRES_DB=user_db
+    ports:
+      - "5435:5435"  # Port Host 5432
+    volumes:
+      - user_data:/var/lib/postgresql/data
+
+  # 5. Database Khusus Project/Buku (BARU)
+  library-db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin123
+      - POSTGRES_DB=library_db
+    ports:
+      - "5433:5432"  # Port Host 5433 (Supaya tidak bentrok)
+    volumes:
+      - library_data:/var/lib/postgresql/data
+
+volumes:
+  user_data:
+  library_data:

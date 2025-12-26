@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perpustakaan Online - Koleksi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa; /* Latar belakang abu-abu muda */
+        }
+        .book-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden; /* Agar gambar tidak keluar radius */
+            border-radius: 12px; /* Sudut kartu lebih membulat */
+        }
+        .book-card:hover {
+            transform: translateY(-8px); /* Efek kartu terangkat saat hover */
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important; /* Bayangan lebih dalam */
+        }
+        .card-img-wrapper {
+            height: 250px; /* Tinggi tetap untuk wadah gambar */
+            overflow: hidden;
+            background-color: #e9ecef; /* Warna placeholder jika gambar lambat */
+        }
+        .card-img-top {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Gambar mengisi area tanpa terdistorsi */
+            transition: transform 0.3s ease;
+        }
+        .book-card:hover .card-img-top {
+            transform: scale(1.05); /* Efek zoom halus pada gambar saat hover */
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-book-half me-2"></i>Perpus Online</a>
+            <div class="d-flex">
+                <div id="nav-login">
+                    <a href="login.html" class="btn btn-light fw-bold"><i class="bi bi-box-arrow-in-right me-1"></i> Login</a>
+                </div>
+                <div id="nav-user" class="d-none text-white d-flex align-items-center bg-primary-dark rounded-pill px-3 py-1">
+                    <span class="me-3"><i class="bi bi-person-circle me-1"></i>Halo, <strong id="username-display">User</strong></span>
+                    <button onclick="handleLogout()" class="btn btn-danger btn-sm rounded-pill px-3">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div id="libraryCarousel" class="carousel slide mb-5 shadow rounded overflow-hidden" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#libraryCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#libraryCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#libraryCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+
+            <div class="carousel-inner">
+                <div class="carousel-item active" data-bs-interval="5000">
+                    <img src="https://picsum.photos/id/367/1200/400" class="d-block w-100" alt="Perpustakaan Nyaman" style="object-fit: cover; height: 400px;">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-3 rounded">
+                        <h3 class="fw-bold">Selamat Datang di E-Perpus</h3>
+                        <p>Akses ribuan buku berkualitas kapan saja dan di mana saja.</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-bs-interval="5000">
+                    <img src="https://picsum.photos/id/1073/1200/400" class="d-block w-100" alt="Belajar Teknologi" style="object-fit: cover; height: 400px;">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-3 rounded">
+                        <h3 class="fw-bold">Koleksi Teknologi Terbaru</h3>
+                        <p>Tingkatkan skill coding dan IT Anda dengan buku-buku terbaru kami.</p>
+                    </div>
+                </div>
+                <div class="carousel-item" data-bs-interval="5000">
+                    <img src="https://picsum.photos/id/24/1200/400" class="d-block w-100" alt="Membaca Santai" style="object-fit: cover; height: 400px;">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-3 rounded">
+                        <h3 class="fw-bold">Teman di Waktu Santai</h3>
+                        <p>Temukan novel dan bacaan ringan untuk menemani waktu istirahat Anda.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#libraryCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#libraryCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        
+	<div class="text-center mb-5">
+            <h1 class="display-5 fw-bold text-primary">Jelajahi Koleksi Kami</h1>
+            <p class="lead text-muted">Temukan buku favorit Anda dan pinjam sekarang.</p>
+        </div>
+
+	<div id="admin-panel" class="card p-4 mb-5 shadow-sm border-warning d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-warning m-0"><i class="bi bi-journal-plus"></i> Tambah Buku</h4>
+            <button id="btn-cancel" onclick="resetForm()" class="btn btn-secondary btn-sm d-none">Batal Edit</button>
+        </div>
+
+        <form onsubmit="handleBookForm(event)" class="row g-2">
+            <input type="hidden" id="editBookId">
+
+            <div class="col-md-3">
+                <input type="text" id="newTitle" class="form-control" placeholder="Judul Buku" required>
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="newAuthor" class="form-control" placeholder="Penulis" required>
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="newCategory" class="form-control" placeholder="Kategori" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" id="newStock" class="form-control" placeholder="Stok" required>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" id="btn-submit" class="btn btn-success w-100"><i class="bi bi-plus-lg"></i></button>
+            </div>
+        </form>
+    </div>
+
+        <div class="row g-4" id="book-list">
+            </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="script.js"></script>
+    <script>
+        // Inisialisasi halaman
+        checkLoginStatus();
+        loadBooks();
+    </script>
+</body>
+</html>
